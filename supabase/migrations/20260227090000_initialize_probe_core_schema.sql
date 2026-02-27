@@ -111,7 +111,9 @@ create table public.branches (
   constraint fk_branches_seller
     foreign key (seller_id)
     references public.sellers(id)
-    on delete restrict
+    on delete restrict,
+  constraint uq_branches_id_seller_id
+    unique (id, seller_id)
 );
 
 create table public.staff (
@@ -128,9 +130,11 @@ create table public.staff (
     references public.sellers(id)
     on delete restrict,
   constraint fk_staff_branch
-    foreign key (branch_id)
-    references public.branches(id)
-    on delete restrict
+    foreign key (branch_id, seller_id)
+    references public.branches(id, seller_id)
+    on delete restrict,
+  constraint uq_staff_id_seller_id
+    unique (id, seller_id)
 );
 
 -- =========================
@@ -158,9 +162,11 @@ create table public.receipts (
     references public.branches(id)
     on delete restrict,
   constraint fk_receipts_staff
-    foreign key (staff_id)
-    references public.staff(id)
+    foreign key (staff_id, seller_id)
+    references public.staff(id, seller_id)
     on delete restrict,
+  constraint uq_receipts_id_seller_id
+    unique (id, seller_id),
   constraint chk_receipts_subtotal_non_negative
     check (subtotal_amount >= 0),
   constraint chk_receipts_vat_non_negative
@@ -222,9 +228,9 @@ create table public.disputes (
   status public.dispute_status not null default 'OPEN',
   created_at timestamptz not null default now(),
   resolved_at timestamptz,
-  constraint fk_disputes_receipt
-    foreign key (receipt_id)
-    references public.receipts(id)
+  constraint fk_disputes_receipt_seller
+    foreign key (receipt_id, seller_id)
+    references public.receipts(id, seller_id)
     on delete restrict,
   constraint fk_disputes_seller
     foreign key (seller_id)
