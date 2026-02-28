@@ -2,11 +2,15 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { createBrowserClient } from '@supabase/ssr'
 
 export default function LoginPage() {
-  const supabase = createClient()
   const router = useRouter()
+
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -30,11 +34,10 @@ export default function LoginPage() {
     }
 
     router.push('/dashboard')
-    router.refresh()
   }
 
   return (
-    <div style={{ padding: 40 }}>
+    <div style={{ maxWidth: 400, margin: '100px auto', display: 'flex', flexDirection: 'column', gap: 12 }}>
       <h1>Login</h1>
 
       <input
@@ -44,18 +47,12 @@ export default function LoginPage() {
         onChange={(e) => setEmail(e.target.value)}
       />
 
-      <br />
-      <br />
-
       <input
         type="password"
         placeholder="Password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
       />
-
-      <br />
-      <br />
 
       <button onClick={handleLogin} disabled={loading}>
         {loading ? 'Logging in...' : 'Login'}
